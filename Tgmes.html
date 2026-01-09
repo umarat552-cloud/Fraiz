@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TgFraiz Premium Ecosystem</title>
+    <style>
+        :root {
+            --accent: #33a1fd;
+            --bg: #0f1721;
+            --side: #17212b;
+            --msg-in: rgba(28, 39, 51, 0.95);
+            --msg-out: rgba(43, 82, 120, 0.95);
+            --text: #ffffff;
+            --gold: #ffd700;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body { background: #000; color: var(--text); height: 100vh; overflow: hidden; display: flex; justify-content: center; }
+
+        /* Фоновое изображение */
+        .app-bg { position: fixed; inset: 0; background: url('https://i.postimg.cc/900SZCg7/photo-2026-01-09-01-13-44.jpg') center/cover; z-index: 1; }
+        .app-overlay { position: fixed; inset: 0; background: rgba(15, 23, 33, 0.85); z-index: 2; }
+
+        /* Основной контейнер */
+        .main-wrapper { position: relative; z-index: 10; width: 100%; max-width: 1200px; height: 100vh; display: flex; background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+
+        /* Боковое меню */
+        .sidebar { width: 280px; background: var(--side); display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); transition: 0.3s; z-index: 1000; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; height: 100%; }
+            .sidebar.open { left: 0; }
+        }
+
+        .side-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .my-ava { width: 80px; height: 80px; border-radius: 50%; background: #222 center/cover; margin: 0 auto 10px; border: 2px solid var(--accent); box-shadow: 0 0 15px rgba(51, 161, 253, 0.3); }
+
+        .menu-items { flex: 1; overflow-y: auto; padding: 15px; }
+        .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .nav-btn:hover { background: rgba(255,255,255,0.05); }
+        .nav-btn.active { background: rgba(51, 161, 253, 0.15); color: var(--accent); }
+
+        /* Чат зона */
+        .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-header { height: 65px; background: rgba(23, 33, 43, 0.8); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .msgs-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .m-row { max-width: 80%; display: flex; flex-direction: column; }
+        .m-in { align-self: flex-start; }
+        .m-out { align-self: flex-end; align-items: flex-end; }
+        .nick { font-size: 13px; font-weight: bold; color: var(--accent); margin-bottom: 3px; cursor: pointer; }
+        .bubble { padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.4; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .m-in .bubble { background: var(--msg-in); border-bottom-left-radius: 4px; }
+        .m-out .bubble { background: var(--msg-out); border-bottom-right-radius: 4px; }
+
+        .input-bar { padding: 15px; background: rgba(23, 33, 43, 0.9); display: flex; gap: 12px; align-items: center; }
+        .input-field { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
+
+        /* Колокольчик */
+        .bell { position: relative; cursor: pointer; font-size: 22px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .bell:hover { background: rgba(255,255,255,0.05); }
+        .dot { position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; display: none; border: 2px solid var(--side); }
+
+        /* Модалки */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
+        .card { background: var(--side); padding: 25px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+
+        .btn-p { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-s { background: none; color: var(--accent); border: 1px solid var(--accent); }
+
+        /* NFT & Market */
+        .nft-item { background: rgba(255,255,255,0.03); border: 1px solid var(--gold); border-radius: 20px; padding: 15px; margin-top: 15px; }
+        .nft-img { width: 100%; border-radius: 15px; margin-bottom: 10px; }
+        .price { color: var(--gold); font-weight: 800; font-size: 1.2rem; margin: 10px 0; }
+
+        /* Скрытые элементы */
+        #mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="app-bg"></div>
+    <div class="app-overlay"></div>
+
+    <div id="auth-screen" class="modal" style="display:flex;">
+        <div class="card">
+            <h2 style="margin-bottom:20px">TgFraiz 2026</h2>
+            <div style="display:flex; gap:10px; margin-bottom:20px; background:rgba(0,0,0,0.2); padding:5px; border-radius:10px;">
+                <button onclick="switchAuth('l')" id="tab-l" style="flex:1; padding:10px; border:none; border-radius:8px; background:var(--accent); color:white; cursor:pointer">Вход</button>
+                <button onclick="switchAuth('r')" id="tab-r" style="flex:1; padding:10px; border:none; border-radius:8px; background:none; color:white; cursor:pointer">Регистрация</button>
+            </div>
+            <input type="text" id="un" placeholder="Логин">
+            <input type="password" id="up" placeholder="Пароль">
+            <div id="reg-fields" style="display:none">
+                <input type="email" id="um" placeholder="Почта">
+                <input type="password" id="ua" placeholder="Секретный код админа">
+            </div>
+            <button class="btn-p" onclick="handleAuth()">Продолжить</button>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div id="sidebar" class="sidebar">
+            <div class="side-header">
+                <div class="my-ava" id="me-ava"></div>
+                <h3 id="me-name">User</h3>
+            </div>
+            <div class="menu-items">
+                <div class="nav-btn active" onclick="goChat('global')">🌐 Общий чат</div>
+                <div class="nav-btn" onclick="openMod('market')">💎 Маркетплейс</div>
+                <div class="nav-btn" onclick="openMod('profile')">👤 Мой профиль</div>
+                <div class="nav-btn" onclick="openMod('settings')">⚙️ Настройки</div>
+                <div style="margin: 20px 0 10px 10px; font-size: 12px; opacity: 0.5; font-weight: bold;">ЛИЧНЫЕ ЧАТЫ</div>
+                <div id="friend-list"></div>
+            </div>
+            <div style="padding:20px">
+                <button class="btn-p" style="background:#3d4b5f" onclick="location.reload()">Выйти</button>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <header class="chat-header">
+                <div id="menu-toggle" style="font-size:24px; cursor:pointer; display:none" onclick="toggleMenu()">☰</div>
+                <b id="chat-title">Общий чат</b>
+                <div class="bell" onclick="openMod('notif')">
+                    🔔 <div id="bell-dot" class="dot"></div>
+                </div>
+            </header>
+            <div class="msgs-container" id="chat-box"></div>
+            <div class="input-bar">
+                <input type="text" id="msg-input" class="input-field" placeholder="Написать сообщение..." onkeyup="if(event.key==='Enter') sendMsg()">
+                <button onclick="sendMsg()" style="background:none; border:none; color:var(--accent); font-weight:bold; cursor:pointer; font-size:18px">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-overlay" onclick="toggleMenu()"></div>
+
+    <div id="mod-market" class="modal">
+        <div class="card">
+            <h3>Маркетплейс</h3>
+            <div class="nft-item">
+                <img src="https://i.postimg.cc/bY2jGB8B/plush-pepe-nft-gift-telegram.jpg" class="nft-img">
+                <h4>Plush Pepe NFT</h4>
+                <div id="market-action">
+                    <div class="price">БЕСПЛАТНО</div>
+                    <button class="btn-p" onclick="buyNFT('Plush Pepe')">ПОЛУЧИТЬ</button>
+                </div>
+            </div>
+            <button class="btn-p btn-s" onclick="closeMod()">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="mod-profile" class="modal">
+        <div class="card">
+            <div class="my-ava" id="prof-ava" style="width:100px; height:100px"></div>
+            <h2 id="prof-nick">Никнейм</h2>
+            <p id="prof-mail" style="opacity:0.5; margin-bottom:15px"></p>
+            <div style="text-align:left">
+                <h4 style="color:var(--gold)">Коллекция NFT:</h4>
+                <div id="prof-nfts" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto"></div>
+            </div>
+            <button class="btn-p btn-s" style="margin-top:20px" onclick="closeMod()">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="mod-settings" class="modal">
+        <div class="card">
+            <h3>Настройки профиля</h3>
+            <p style="margin:15px 0">Сменить аватар:</p>
+            <input type="file" id="file-ava" accept="image/*" style="display:none" onchange="uploadAva()">
+            <button class="btn-p" onclick="document.getElementById('file-ava').click()">Выбрать файл</button>
+            <button class="btn-p btn-s" style="margin-top:10px" onclick="closeMod()">Отмена</button>
+        </div>
+    </div>
+
+    <div id="mod-notif" class="modal">
+        <div class="card">
+            <h3>Заявки в друзья</h3>
+            <div id="req-list" style="margin:15px 0; text-align:left"></div>
+            <button class="btn-p btn-s" onclick="closeMod()">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="mod-user" class="modal">
+        <div class="card">
+            <div class="my-ava" id="view-ava"></div>
+            <h2 id="view-nick">User</h2>
+            <div id="view-actions" style="margin-top:15px"></div>
+            <button class="btn-p btn-s" style="margin-top:10px" onclick="closeMod()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        let me = null, curChat = 'global', authMode = 'l';
+
+        const DB = {
+            get: (k) => JSON.parse(localStorage.getItem('tf_final_'+k) || (k==='u'?'{}':'[]')),
+            set: (k, v) => localStorage.setItem('tf_final_'+k, JSON.stringify(v))
+        };
+
+        // Адаптив
+        function checkMobile() {
+            const isMob = window.innerWidth <= 768;
+            document.getElementById('menu-toggle').style.display = isMob ? 'block' : 'none';
+        }
+        window.onresize = checkMobile;
+        checkMobile();
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('mobile-overlay').style.display =
+                document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none';
+        }
+
+        function switchAuth(m) {
+            authMode = m;
+            document.getElementById('tab-l').style.background = m === 'l' ? 'var(--accent)' : 'none';
+            document.getElementById('tab-r').style.background = m === 'r' ? 'var(--accent)' : 'none';
+            document.getElementById('reg-extra').style.display = m === 'r' ? 'block' : 'none';
+        }
+
+        function handleAuth() {
+            const u = document.getElementById('un').value.trim();
+            const p = document.getElementById('up').value.trim();
+            const users = DB.get('u');
+
+            if(authMode === 'r') {
+                if(users[u]) return alert("Ник занят");
+                users[u] = {
+                    p,
+                    mail: document.getElementById('um').value,
+                    r: document.getElementById('ua').value === '777888' ? 'admin' : 'user',
+                    ava: '', nfts: [], friends: []
+                };
+                DB.set('u', users);
+                alert("Регистрация успешна!");
+                switchAuth('l');
+            } else {
+                if(!users[u] || users[u].p !== p) return alert("Неверный логин или пароль");
+                me = { n: u, ...users[u] };
+                document.getElementById('auth-screen').style.display = 'none';
+                startApp();
+            }
+        }
+
+        function startApp() {
+            document.getElementById('me-name').innerText = me.n;
+            updateMeUI();
+            render();
+            setInterval(render, 3000);
+        }
+
+        function updateMeUI() {
+            if(me.ava) document.getElementById('me-ava').style.backgroundImage = `url(${me.ava})`;
+        }
+
+        function uploadAva() {
+            const file = document.getElementById('file-ava').files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let users = DB.get('u');
+                users[me.n].ava = e.target.result;
+                DB.set('u', users);
+                me.ava = e.target.result;
+                updateMeUI();
+                alert("Аватар успешно изменен!");
+                closeMod();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function buyNFT(name) {
+            let users = DB.get('u');
+            if(users[me.n].nfts.includes(name)) return alert("У вас уже есть этот предмет");
+            users[me.n].nfts.push(name);
+            DB.set('u', users);
+            me.nfts.push(name);
+            alert("Поздравляем! NFT добавлен в профиль.");
+            document.getElementById('market-action').innerHTML = `<div class="price">1 000 000 РУБ.</div><button class="btn-p" style="opacity:0.5" disabled>В КОЛЛЕКЦИИ</button>`;
+        }
+
+        function openMod(id) {
+            closeMod();
+            if(id === 'profile') {
+                document.getElementById('prof-nick').innerText = me.n;
+                document.getElementById('prof-mail').innerText = me.mail || "Почта не указана";
+                document.getElementById('prof-ava').style.backgroundImage = me.ava ? `url(${me.ava})` : '';
+                const nftBox = document.getElementById('prof-nfts');
+                nftBox.innerHTML = me.nfts.length ? '' : 'Пусто';
+                me.nfts.forEach(n => {
+                    nftBox.innerHTML += `<img src="https://i.postimg.cc/bY2jGB8B/plush-pepe-nft-gift-telegram.jpg" style="width:70px; border-radius:10px">`;
+                });
+            }
+            if(id === 'notif') {
+                const reqs = DB.get('req').filter(r => r.to === me.n);
+                const list = document.getElementById('req-list');
+                list.innerHTML = reqs.length ? '' : 'Заявок нет';
+                reqs.forEach(r => {
+                    list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:rgba(255,255,255,0.05); margin-bottom:5px; border-radius:10px">
+                        <span>${r.from}</span>
+                        <button onclick="acceptReq('${r.from}')" style="color:var(--accent); background:none; border:none; cursor:pointer">Принять</button>
+                    </div>`;
+                });
+            }
+            document.getElementById('mod-' + id).style.display = 'flex';
+            if(window.innerWidth <= 768) toggleMenu();
+        }
+
+        function closeMod() {
+            document.querySelectorAll('.modal').forEach(m => { if(m.id !== 'auth-screen') m.style.display = 'none'; });
+        }
+
+        function sendMsg() {
+            const val = document.getElementById('msg-input').value.trim();
+            if(!val) return;
+            let msgs = DB.get('m');
+            msgs.push({ f: me.n, t: curChat, val, id: Date.now() });
+            DB.set('m', msgs);
+            document.getElementById('msg-input').value = '';
+            render();
+        }
+
+        function render() {
+            const box = document.getElementById('chat-box');
+            const msgs = DB.get('m');
+            const users = DB.get('u');
+
+            const filtered = msgs.filter(m => {
+                if(curChat === 'global') return m.t === 'global';
+                return (m.f === me.n && m.t === curChat) || (m.f === curChat && m.t === me.n);
+            });
+
+            let html = '';
+            filtered.forEach(m => {
+                const isMe = m.f === me.n;
+                html += `<div class="m-row ${isMe ? 'm-out' : 'm-in'}">
+                    ${!isMe ? `<div class="nick" onclick="viewUser('${m.f}')">${m.f}</div>` : ''}
+                    <div class="bubble">${m.val}</div>
+                </div>`;
+            });
+            if(box.innerHTML !== html) {
+                box.innerHTML = html;
+                box.scrollTop = box.scrollHeight;
+            }
+
+            // Список друзей в меню
+            const flist = document.getElementById('friend-list');
+            flist.innerHTML = '';
+            users[me.n].friends.forEach(f => {
+                flist.innerHTML += `<div class="nav-btn ${curChat===f?'active':''}" onclick="goChat('${f}')">👤 ${f}</div>`;
+            });
+
+            // Колокольчик
+            const reqs = DB.get('req').filter(r => r.to === me.n);
+            document.getElementById('bell-dot').style.display = reqs.length ? 'block' : 'none';
+        }
+
+        function viewUser(name) {
+            const u = DB.get('u')[name];
+            document.getElementById('view-nick').innerText = name;
+            document.getElementById('view-ava').style.backgroundImage = u.ava ? `url(${u.ava})` : '';
+            const isF = DB.get('u')[me.n].friends.includes(name);
+            document.getElementById('view-actions').innerHTML = isF ?
+                `<button class="btn-p" onclick="goChat('${name}'); closeMod()">Написать</button>` :
+                `<button class="btn-p" onclick="sendReq('${name}')">Добавить в друзья</button>`;
+            document.getElementById('mod-user').style.display = 'flex';
+        }
+
+        function sendReq(to) {
+            let r = DB.get('req');
+            if(!r.some(x => x.from === me.n && x.to === to)) {
+                r.push({ from: me.n, to });
+                DB.set('req', r);
+                alert("Заявка отправлена!");
+            }
+            closeMod();
+        }
+
+        function acceptReq(name) {
+            let u = DB.get('u');
+            if(!u[me.n].friends.includes(name)) u[me.n].friends.push(name);
+            if(!u[name].friends.includes(me.n)) u[name].friends.push(me.n);
+            let r = DB.get('req').filter(x => !(x.from === name && x.to === me.n));
+            DB.set('u', u); DB.set('req', r);
+            me.friends.push(name);
+            render(); closeMod();
+        }
+
+        function goChat(id) {
+            curChat = id;
+            document.getElementById('chat-title').innerText = id === 'global' ? 'Общий чат' : id;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            render();
+        }
+    </script>
+</body>
+</html>
